@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"time"
 
 	"github.com/belak/sensu-go-tools/utils"
 	"github.com/go-irc/irc"
@@ -45,23 +46,39 @@ func main() {
 	conn.Writef("NICK :%s", config.Nick)
 	conn.Writef("USER %s 0.0.0.0 0.0.0.0 :%s", "sensu", "sensu")
 
-	for {
-		msg, err := conn.ReadMessage()
+	errChan := make(chan error)
+
+	go func() {
+		for {
+			msg, err := conn.ReadMessage()
+			if err != nil {
+				errChan <- err
+			}
+
+			if msg.Command == "PING" {
+				reply := msg.Copy()
+				reply.Command = "PONG"
+				conn.WriteMessage(reply)
+			} else if msg.Command == "001" {
+				conn.Writef("JOIN :%s", config.Channel)
+				conn.Writef("PRIVMSG %s :%s", config.Channel, "Message")
+				conn.Writef("QUIT :bye")
+
+				errChan <- nil
+				return
+			}
+		}
+	}()
+
+	select {
+	case err := <-errChan:
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
+			os.Exit(1)
+		} else {
+			log.Println("Sent message")
 		}
-
-		if msg.Command == "PING" {
-			reply := msg.Copy()
-			reply.Command = "PONG"
-			conn.WriteMessage(reply)
-		} else if msg.Command == "001" {
-			conn.Writef("JOIN :%s", config.Channel)
-			conn.Writef("PRIVMSG %s :%s", config.Channel, "Message")
-			conn.Writef("QUIT :bye")
-
-			os.Exit(0)
-			return
-		}
+	case <-time.After(10 * time.Second):
+		log.Println("Message timeout")
 	}
 }
