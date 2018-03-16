@@ -25,34 +25,39 @@ var event utils.Event
 func main() {
 	utils.InitPlugin("irc", &event, &config)
 
-	var err error
-
-	log.Println(event)
-
-	var rawConn net.Conn
-	if config.SSL {
-		rawConn, err = tls.Dial("tcp", config.Server, nil)
-	} else {
-		rawConn, err = net.Dial("tcp", config.Server)
-	}
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	conn := irc.NewConn(rawConn)
-	if config.Password != "" {
-		conn.Writef("PASS :%s", config.Password)
-	}
-	conn.Writef("NICK :%s", config.Nick)
-	conn.Writef("USER %s 0.0.0.0 0.0.0.0 :%s", "sensu", "sensu")
-
 	errChan := make(chan error)
 
 	go func() {
+		var err error
+		var rawConn net.Conn
+		if config.SSL {
+			rawConn, err = tls.Dial("tcp", config.Server, nil)
+		} else {
+			rawConn, err = net.Dial("tcp", config.Server)
+		}
+		if err != nil {
+			errChan <- err
+			return
+		}
+		defer rawConn.Close()
+
+		conn := irc.NewConn(rawConn)
+		if config.Password != "" {
+			conn.Writef("PASS :%s", config.Password)
+		}
+		conn.Writef("NICK :%s", config.Nick)
+		conn.Writef("USER %s 0.0.0.0 0.0.0.0 :%s", "sensu", "sensu")
+
+		var actionString = "\x0301,04ALERT\x03"
+		if event.Action == "resolve" {
+			actionString = "\x0300,03RESOLVED\x03"
+		}
+
 		for {
 			msg, err := conn.ReadMessage()
 			if err != nil {
 				errChan <- err
+				return
 			}
 
 			if msg.Command == "PING" {
@@ -61,7 +66,7 @@ func main() {
 				conn.WriteMessage(reply)
 			} else if msg.Command == "001" {
 				conn.Writef("JOIN :%s", config.Channel)
-				conn.Writef("PRIVMSG %s :%s", config.Channel, "Message")
+				conn.Writef("PRIVMSG %s :%s %s/%s: %s", config.Channel, actionString, event.Entity.ID, event.Check.Name, event.Check.Output)
 				conn.Writef("QUIT :bye")
 
 				errChan <- nil

@@ -6,40 +6,35 @@ import (
 )
 
 type Event struct {
-	ID         string
-	Action     string
-	Timestamp  int
-	Occurences int
-	Check      EventCheck
-	Client     EventClient
+	ID         string      `json:"id"`
+	Timestamp  int         `json:"timestamp"`
+	Action     string      `json:"action"`
+	Occurences int         `json:"occurrences"`
+	Check      EventCheck  `json:"check"`
+	Client     EventClient `json:"client"`
 }
 
 type EventCheck struct {
-	Type             string
-	TotalStateChange int `json:"total_state_change"`
-	History          []string
-	Status           int
-	Output           string
-	Executed         int
-	Issued           int
-	Name             string
-	Thresholds       struct {
-		Critical int
-		Warning  int
-	}
+	Type        string   `json:"type"`
+	Name        string   `json:"name"`
+	Command     string   `json:"command"`
+	Subscribers []string `json:"subscribers"`
+	Interval    int      `json:"interval"`
+	Handler     string   `json:"handler"`
+	Handlers    []string `json:"handlers"`
+	Issued      int      `json:"issued"`
+	Output      string   `json:"output"`
+	Status      int      `json:"status"`
+	History     []int    `json:"history"`
+	Source      string   `json:"source"`
+	Origin      string   `json:"origin"`
 }
 
 type EventClient struct {
-	Timestamp int
-	Version   string
-	Socket    struct {
-		Port int
-		Bind string
-	}
-	Subscriptions []string
-	Environment   string
-	Address       string
-	Name          string
+	Name          string   `json:"name"`
+	Address       string   `json:"address"`
+	Subscriptions []string `json:"subscriptions"`
+	Timestamp     int      `json:"timestamp"`
 }
 
 func ReadEvent(event *Event) error {
