@@ -11,7 +11,7 @@ type Event struct {
 	Action     string      `json:"action"`
 	Occurences int         `json:"occurrences"`
 	Check      EventCheck  `json:"check"`
-	Client     EventClient `json:"client"`
+	Entity     EventEntity `json:"entity"`
 }
 
 type EventCheck struct {
@@ -30,8 +30,8 @@ type EventCheck struct {
 	Origin      string   `json:"origin"`
 }
 
-type EventClient struct {
-	Name          string   `json:"name"`
+type EventEntity struct {
+	ID            string   `json:"ID"`
 	Address       string   `json:"address"`
 	Subscriptions []string `json:"subscriptions"`
 	Timestamp     int      `json:"timestamp"`
