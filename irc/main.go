@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/belak/sensu-go-tools/utils"
+	"../utils"
 	"github.com/go-irc/irc"
 )
 
@@ -31,7 +31,9 @@ func main() {
 		var err error
 		var rawConn net.Conn
 		if config.SSL {
-			rawConn, err = tls.Dial("tcp", config.Server, nil)
+			rawConn, err = tls.Dial("tcp", config.Server, &tls.Config{
+				InsecureSkipVerify: true,
+			})
 		} else {
 			rawConn, err = net.Dial("tcp", config.Server)
 		}
@@ -49,7 +51,7 @@ func main() {
 		conn.Writef("USER %s 0.0.0.0 0.0.0.0 :%s", "sensu", "sensu")
 
 		var actionString = "\x0301,04ALERT\x03"
-		if event.Action == "resolve" {
+		if event.Check.State == "passing" {
 			actionString = "\x0300,03RESOLVED\x03"
 		}
 
