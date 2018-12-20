@@ -15,3 +15,6 @@
 
 # Config
 *.json
+
+# Go modules
+go.sum

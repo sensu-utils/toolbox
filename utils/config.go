@@ -7,7 +7,6 @@ import (
 )
 
 func ReadConfig(configName string, target interface{}) error {
-	//filename := fmt.Sprintf("/etc/sensu/%s.json", configName)
 	filename := fmt.Sprintf("/etc/sensu/%s.json", configName)
 	file, err := os.Open(filename)
 	if err != nil {

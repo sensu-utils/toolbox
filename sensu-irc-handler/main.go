@@ -49,7 +49,7 @@ func main() {
 		conn.Writef("USER %s 0.0.0.0 0.0.0.0 :%s", "sensu", "sensu")
 
 		var actionString = "\x0301,04ALERT\x03"
-		if event.Action == "resolve" {
+		if event.IsResolution() {
 			actionString = "\x0300,03RESOLVED\x03"
 		}
 
@@ -66,7 +66,7 @@ func main() {
 				conn.WriteMessage(reply)
 			} else if msg.Command == "001" {
 				conn.Writef("JOIN :%s", config.Channel)
-				conn.Writef("PRIVMSG %s :%s %s/%s: %s", config.Channel, actionString, event.Entity.ID, event.Check.Name, event.Check.Output)
+				conn.Writef("PRIVMSG %s :%s %s/%s: %s", config.Channel, actionString, event.Entity.System.Hostname, event.Check.Name, event.Check.Output)
 				conn.Writef("QUIT :bye")
 
 				errChan <- nil

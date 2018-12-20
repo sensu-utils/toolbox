@@ -3,41 +3,25 @@ package utils
 import (
 	"encoding/json"
 	"os"
+
+	"github.com/sensu/sensu-go/types"
 )
 
+// Event is a wrapper around sensu-go's Event so we can add convenience
+// methods.
 type Event struct {
-	ID         string      `json:"id"`
-	Timestamp  int         `json:"timestamp"`
-	Action     string      `json:"action"`
-	Occurences int         `json:"occurrences"`
-	Check      EventCheck  `json:"check"`
-	Client     EventClient `json:"client"`
-}
-
-type EventCheck struct {
-	Type        string   `json:"type"`
-	Name        string   `json:"name"`
-	Command     string   `json:"command"`
-	Subscribers []string `json:"subscribers"`
-	Interval    int      `json:"interval"`
-	Handler     string   `json:"handler"`
-	Handlers    []string `json:"handlers"`
-	Issued      int      `json:"issued"`
-	Output      string   `json:"output"`
-	Status      int      `json:"status"`
-	History     []int    `json:"history"`
-	Source      string   `json:"source"`
-	Origin      string   `json:"origin"`
-}
-
-type EventClient struct {
-	Name          string   `json:"name"`
-	Address       string   `json:"address"`
-	Subscriptions []string `json:"subscriptions"`
-	Timestamp     int      `json:"timestamp"`
+	types.Event
 }
 
 func ReadEvent(event *Event) error {
 	decoder := json.NewDecoder(os.Stdin)
-	return decoder.Decode(event)
+	if err := decoder.Decode(event); err != nil {
+		return err
+	}
+
+	if err := event.Check.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }
