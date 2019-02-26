@@ -1,4 +1,4 @@
-module github.com/belak/sensu-go-utils
+module github.com/sensu-utils/toolbox
 
 require (
 	github.com/coreos/etcd v3.3.12+incompatible // indirect
