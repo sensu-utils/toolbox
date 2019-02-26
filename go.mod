@@ -1,6 +1,7 @@
 module github.com/sensu-utils/toolbox
 
 require (
+	github.com/caarlos0/env v3.5.0+incompatible
 	github.com/coreos/etcd v3.3.12+incompatible // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/echlebek/timeproxy v1.0.0 // indirect
