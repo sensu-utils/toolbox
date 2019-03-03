@@ -2,6 +2,7 @@ package toolbox
 
 import "log"
 
+// InitPlugin inititalizes a new Sensu handler plugin
 func InitPlugin(name string, event *Event, config interface{}) {
 	if event != nil {
 		err := ReadEvent(event)

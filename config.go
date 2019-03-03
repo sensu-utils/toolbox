@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// ReadConfig reads in a sensu handler plugin configuration file
 func ReadConfig(configName string, target interface{}) error {
 	filename := fmt.Sprintf("/etc/sensu/%s.json", configName)
 	file, err := os.Open(filename)
